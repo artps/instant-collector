@@ -1,4 +1,3 @@
-
 -module(collector_sup).
 
 -behaviour(supervisor).
@@ -28,14 +27,14 @@ init([]) ->
     {ok, Workers} = application:get_env(collector, workers),
 
     Dispatch = [
-		{'_', [
-			{[<<"sensors">>, sensor_id], collector_sensor_handler, []}
-		]}
-	],
-	ChildSpec = cowboy:child_spec(collector_http, Workers,
-		cowboy_tcp_transport, [{port, Port}],
-		cowboy_http_protocol, [{dispatch, Dispatch}]
-	),
+        {'_', [
+            {[<<"sensors">>, sensor_id], collector_sensor_handler, []}
+        ]}
+    ],
+    ChildSpec = cowboy:child_spec(collector_http, Workers,
+        cowboy_tcp_transport, [{port, Port}],
+        cowboy_http_protocol, [{dispatch, Dispatch}]
+    ),
 
     {ok, { {one_for_one, 5, 10}, [ChildSpec]} }.
 

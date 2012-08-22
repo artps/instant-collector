@@ -1,7 +1,9 @@
 -module(collector_sensor_handler).
 
 -export([init/3]).
--export([allowed_methods/2, content_types_provided/2, content_types_accepted/2]).
+-export([allowed_methods/2,
+        content_types_provided/2,
+        content_types_accepted/2]).
 -export([handle_get/2, handle_put/2]).
 
 init(_Transport, _Req, []) ->
