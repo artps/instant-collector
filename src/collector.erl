@@ -11,5 +11,6 @@ ensure_started(App) ->
 start() ->
     sync:go(),
 
+    ensure_started(sockjs),
     ensure_started(cowboy),
     ensure_started(collector).

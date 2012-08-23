@@ -26,8 +26,13 @@ init([]) ->
     {ok, Port} = application:get_env(collector, port),
     {ok, Workers} = application:get_env(collector, workers),
 
+    SockjsState = sockjs_handler:init_state(
+        <<"/channel">>, collector_sockjs_handler, state, []
+    ),
+
     Dispatch = [
         {'_', [
+            {[<<"channel">>, '...'], sockjs_cowboy_handler, SockjsState},
             {[<<"sensors">>, sensor_id], collector_sensor_handler, []}
         ]}
     ],
