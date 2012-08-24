@@ -33,7 +33,12 @@ init([]) ->
     Dispatch = [
         {'_', [
             {[<<"channel">>, '...'], sockjs_cowboy_handler, SockjsState},
-            {[<<"sensors">>, sensor_id], collector_sensor_handler, []}
+            {[<<"sensors">>, sensor_id], collector_sensor_handler, []},
+            {['...'], cowboy_http_static, [
+                    {directory, {priv_dir, collector, []}},
+                    {mimetypes, {fun mimetypes:path_to_mimes/2, default}},
+                    {etag, {attributes, [filepath, filesize, inode, mtime]}}
+            ]}
         ]}
     ],
     ChildSpec = cowboy:child_spec(collector_http, Workers,
