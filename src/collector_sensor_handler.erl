@@ -31,5 +31,5 @@ handle_get(Req, State) ->
 handle_put(Req, State) ->
     {ok, Body, Req1} = cowboy_http_req:body(Req),
     {SensorId, Req2} = cowboy_http_req:binding(sensor_id, Req1),
-    error_logger:info_msg("SensorId #~p sended data: \n~p \n~n", [SensorId, Body]),
+    collector_sockjs_handler:broadcast(SensorId, Body),
     {true, Req2, State}.
