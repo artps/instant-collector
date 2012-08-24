@@ -20,7 +20,7 @@ var Track = function(sensorId, map) {
             path: pathCoords,
             strokeColor: self.color(),
             strokeOpacity: 1.0,
-            strokeWeight: 1
+            strokeWeight: 2
         });
 
         path.setMap(map);
@@ -43,7 +43,7 @@ var App = function() {
     this.center = new google.maps.LatLng(55.8005556, 49.1055556);
 
     this.map = new google.maps.Map(document.getElementById('canvas'), {
-        zoom: 11,
+        zoom: 13,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         center: this.center
     });
@@ -62,6 +62,18 @@ var App = function() {
 
 App.init = function() {
     App.instance = new App();
+
+    var route = [
+        100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113,
+        26, 27, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43, 44, 45,
+        46, 47, 48, 49, 5, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62,
+        63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 80, 81,
+        82, 83, 85, 87, 88, 89, 90, 91, 94, 95, 96, 97, 98, 99];
+    $('#subscribe').on('click', function(evt) {
+        evt.preventDefault();
+        App.subscribe(route[Math.floor(Math.random()*route.length+1)]);
+    });
+
     return App.instance;
 };
 
@@ -80,7 +92,9 @@ App.prototype = {
     },
 
     subscribe: function(sensorId) {
-        this.tracks[sensorId] = new Track(sensorId, this.map);
+        if(!this.tracks[sensorId]) {
+            this.tracks[sensorId] = new Track(sensorId, this.map);
+        }
         this.send({ mode: 'subscribe', sensor_id: sensorId });
     },
 
