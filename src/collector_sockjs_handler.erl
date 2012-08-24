@@ -7,8 +7,6 @@
 -export([broadcast/2]).
 
 
--define(TABLE, broadcast_table).
-
 sockjs_init(Connection, State) ->
     {ok, State}.
 
@@ -30,28 +28,25 @@ sockjs_terminate(Connection, State) ->
 
 
 subscribe(Connection, SensorId) ->
-    true = ets:insert(?TABLE, {[{conn, Connection}, {sensor_id, SensorId}]}),
-    ok.
+    collector_store:insert([
+        { conn, Connection },
+        { sensor_id, SensorId }
+    ]).
 
 unsubscribe(Connection, SensorId) ->
-    true = ets:delete_object(?TABLE, {Connection, SensorId}),
-    ok.
+    collector_store:delete([
+        { conn, Connection },
+        { sensor_id, SensorId }
+    ]).
 
 
 broadcast(SensorId, Data) when is_binary(SensorId) ->
     broadcast(list_to_integer(binary_to_list(SensorId)), Data);
 broadcast(SensorId, Data) ->
-    ets:foldl(fun(Item, _Acc) ->
+    collector_store:foldl(fun(Item, _Acc) ->
         case Item of
-            {[{conn, Conn}, {sensor_id, Num}]} -> send_message(Conn, Data, Num, SensorId);
+            {[ {conn, Conn}, {sensor_id, Num} ]} when Num =:= SensorId ->
+                Conn:send(Data);
             _ -> ok
         end
-    end, [], ?TABLE),
-    ok.
-
-
-send_message(Conn, Data, Num, SensorId) when Num =:= SensorId ->
-    Conn:send(Data),
-    ok;
-send_message(_Conn, _Data, Num, SensorId) ->
-    ok.
+    end).

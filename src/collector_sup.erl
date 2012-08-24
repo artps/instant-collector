@@ -46,5 +46,8 @@ init([]) ->
         cowboy_http_protocol, [{dispatch, Dispatch}]
     ),
 
-    {ok, { {one_for_one, 5, 10}, [ChildSpec]} }.
+    {ok, { {one_for_one, 5, 10}, [
+        ChildSpec,
+        ?CHILD(collector_store, worker)
+    ]} }.
 
