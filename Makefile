@@ -26,7 +26,7 @@ clean-docs:
 	rm -f doc/edoc-info
 
 run:
-	erl +P 65535 -sname collector -pa ebin -pa deps/*/ebin -boot start_sasl -s collector -config priv/collector.config
+	erl -K true -A 64 -W w +P 65535 -sname collector -pa ebin -pa deps/*/ebin -boot start_sasl -s collector -config priv/collector.config
 
 build-plt:
 	@$(DIALYZER) --build_plt --output_plt .$(PROJECT).plt \

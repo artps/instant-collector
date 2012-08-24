@@ -6,7 +6,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
          terminate/2, code_change/3]).
 
--export([insert/1, delete/1, foldl/1]).
+-export([insert/1, delete/1, match/1]).
 
 -record(state, {}).
 
@@ -19,8 +19,9 @@ insert(Data) ->
 delete(Key) ->
     gen_server:call(?MODULE, {delete, Key}).
 
-foldl(Callback) ->
-    gen_server:call(?MODULE, {foldl, Callback}).
+match(Query) ->
+    gen_server:call(?MODULE, {match, Query}).
+
 
 
 start_link() ->
@@ -40,9 +41,9 @@ handle_call({delete, Key}, _From, State) ->
     true = ets:delete_object(?TABLE, {Key}),
     {reply, ok, State};
 
-handle_call({foldl, Callback}, _From, State) ->
-    ets:foldl(Callback, [], ?TABLE),
-    {reply, ok, State};
+handle_call({match, Query}, _From, State) ->
+    Result = ets:match(?TABLE, Query),
+    {reply, {ok, Result}, State};
 
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.

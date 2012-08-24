@@ -43,10 +43,15 @@ unsubscribe(Connection, SensorId) ->
 broadcast(SensorId, Data) when is_binary(SensorId) ->
     broadcast(list_to_integer(binary_to_list(SensorId)), Data);
 broadcast(SensorId, Data) ->
-    collector_store:foldl(fun(Item, _Acc) ->
-        case Item of
-            {[ {conn, Conn}, {sensor_id, Num} ]} when Num =:= SensorId ->
-                Conn:send(Data);
-            _ -> ok
-        end
-    end).
+    {ok, Connections} = collector_store:match({[{conn, '$1'}, {sensor_id, SensorId}]}),
+    case Connections of
+        [] -> ok;
+        Connections -> send_message(Connections, Data)
+    end.
+
+send_message([], _) ->
+    ok;
+send_message([[Connection]|Connections], Data) ->
+    Connection:send(Data),
+    send_message(Connections, Data).
+
