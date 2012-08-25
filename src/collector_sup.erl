@@ -48,6 +48,7 @@ init([]) ->
 
     {ok, { {one_for_one, 5, 10}, [
         ChildSpec,
-        ?CHILD(collector_store, worker)
+        %?CHILD(collector_store, worker),
+        ?CHILD(collector_connection_sup, supervisor)
     ]} }.
 

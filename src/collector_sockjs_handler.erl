@@ -4,20 +4,22 @@
         sockjs_handle/3,
         sockjs_terminate/2]).
 
--export([broadcast/2]).
+-record(state, {connection}).
+
 
 
 sockjs_init(Connection, State) ->
-    {ok, State}.
+    {ok, Pid} = collector_connection_sup:start_child(Connection),
+    error_logger:info_msg("~n~n ============= PID ============= ~p~n~n~n", [Pid]),
+    {ok, #state{connection=Pid}}.
 
 sockjs_handle(Connection, Binary, State) ->
     {Data} = jiffy:decode(Binary),
 
     case proplists:get_value(<<"mode">>, Data) of
         <<"subscribe">> ->
-            subscribe(Connection, proplists:get_value(<<"sensor_id">>, Data));
-        <<"unsubscribe">> ->
-            unsubscribe(Connection, proplists:get_value(<<"sensor_id">>, Data));
+            SensorId = proplists:get_value(<<"sensor_id">>, Data),
+            collector_connection:subscribe(State#state.connection, SensorId);
         _ -> ok
     end,
 
@@ -26,28 +28,6 @@ sockjs_handle(Connection, Binary, State) ->
 sockjs_terminate(Connection, State) ->
     {ok, State}.
 
-
-subscribe(Connection, SensorId) ->
-    collector_store:insert([
-        { conn, Connection },
-        { sensor_id, SensorId }
-    ]).
-
-unsubscribe(Connection, SensorId) ->
-    collector_store:delete([
-        { conn, Connection },
-        { sensor_id, SensorId }
-    ]).
-
-
-broadcast(SensorId, Data) when is_binary(SensorId) ->
-    broadcast(list_to_integer(binary_to_list(SensorId)), Data);
-broadcast(SensorId, Data) ->
-    {ok, Connections} = collector_store:match({[{conn, '$1'}, {sensor_id, SensorId}]}),
-    case Connections of
-        [] -> ok;
-        Connections -> send_message(Connections, Data)
-    end.
 
 send_message([], _) ->
     ok;
