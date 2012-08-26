@@ -26,13 +26,9 @@ init([]) ->
     {ok, Port} = application:get_env(collector, port),
     {ok, Workers} = application:get_env(collector, workers),
 
-    SockjsState = sockjs_handler:init_state(
-        <<"/channel">>, collector_sockjs_handler, state, []
-    ),
-
     Dispatch = [
         {'_', [
-            {[<<"channel">>, '...'], sockjs_cowboy_handler, SockjsState},
+            {[<<"stream">>, '...'], bullet_handler, [{handler, collector_stream_handler}]},
             {[<<"sensors">>, sensor_id], collector_sensor_handler, []},
             {['...'], cowboy_http_static, [
                     {directory, {priv_dir, collector, []}},
@@ -47,8 +43,6 @@ init([]) ->
     ),
 
     {ok, { {one_for_one, 5, 10}, [
-        ChildSpec,
-        %?CHILD(collector_store, worker),
-        ?CHILD(collector_connection_sup, supervisor)
+        ChildSpec
     ]} }.
 

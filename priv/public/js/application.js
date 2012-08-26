@@ -48,7 +48,7 @@ var App = function() {
         center: this.center
     });
 
-    this.client = new SockJS('/channel');
+    this.client = $.bullet('ws://localhost:8080/stream');
     this.client.onopen = function() {
         var route = [
             100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113,
@@ -65,7 +65,6 @@ var App = function() {
     this.client.onmessage = function(evt) {
         return self.onmessage(evt);
     };
-    this.client.onclose = function() { };
 
     this.tracks = {};
 
